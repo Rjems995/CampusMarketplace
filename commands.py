@@ -32,6 +32,8 @@ def seed_db():
     from models.user import User
     from models.profile import Profile
 
+    db.create_all()
+  
     # Categories
     default_categories = [
         ("Books",               "books",               "bi-book",             1),
