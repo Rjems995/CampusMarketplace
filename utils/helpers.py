@@ -9,7 +9,15 @@ from datetime import datetime, timedelta
 from PIL import Image
 from flask import current_app
 from slugify import slugify
+import cloudinary
+import cloudinary.uploader
 
+cloudinary.config(
+    cloud_name=os.environ.get("CLOUDINARY_CLOUD_NAME"),
+    api_key=os.environ.get("CLOUDINARY_API_KEY"),
+    api_secret=os.environ.get("CLOUDINARY_API_SECRET"),
+    secure=True,
+)
 
 # ── Image helpers ─────────────────────────────────────────────────────────────
 
@@ -21,17 +29,9 @@ def allowed_image(filename: str) -> bool:
 
 def save_image(file_storage, subfolder: str, size: tuple = None) -> str:
     """
-    Save an uploaded image to uploads/<subfolder>/, optionally resize it.
-    Returns the saved filename (not the full path).
+    Upload an image to Cloudinary under <subfolder>/, optionally resize it first.
+    Returns the full Cloudinary URL (not just a filename).
     """
-    upload_root = current_app.config["UPLOAD_FOLDER"]
-    dest_dir = os.path.join(upload_root, subfolder)
-    os.makedirs(dest_dir, exist_ok=True)
-
-    ext      = file_storage.filename.rsplit(".", 1)[-1].lower()
-    filename = f"{uuid.uuid4().hex}.{ext}"
-    filepath = os.path.join(dest_dir, filename)
-
     img = Image.open(file_storage)
 
     # Convert RGBA / palette to RGB so JPEG saves cleanly
@@ -41,18 +41,38 @@ def save_image(file_storage, subfolder: str, size: tuple = None) -> str:
     if size:
         img.thumbnail(size, Image.LANCZOS)
 
-    img.save(filepath, optimize=True, quality=85)
-    return filename
+    # Save resized image to a temporary in-memory buffer
+    import io
+    buffer = io.BytesIO()
+    img.save(buffer, format="JPEG", optimize=True, quality=85)
+    buffer.seek(0)
+
+    public_id = f"{subfolder}/{uuid.uuid4().hex}"
+
+    result = cloudinary.uploader.upload(
+        buffer,
+        public_id=public_id,
+        overwrite=True,
+        resource_type="image",
+    )
+
+    return result["secure_url"]
 
 
 def delete_image(filename: str, subfolder: str) -> None:
-    """Delete an image file from disk if it exists."""
+    """Delete an image from Cloudinary if it exists."""
     if not filename:
         return
-    upload_root = current_app.config["UPLOAD_FOLDER"]
-    path = os.path.join(upload_root, subfolder, filename)
-    if os.path.isfile(path):
-        os.remove(path)
+
+    # filename is actually a full Cloudinary URL now; extract the public_id
+    try:
+        # URL looks like: https://res.cloudinary.com/<cloud>/image/upload/v.../<subfolder>/<id>.jpg
+        parts = filename.split("/")
+        # last two segments: subfolder/filename.ext
+        public_id = f"{parts[-2]}/{parts[-1].rsplit('.', 1)[0]}"
+        cloudinary.uploader.destroy(public_id)
+    except Exception:
+        pass
 
 
 # ── Slug helpers ──────────────────────────────────────────────────────────────
