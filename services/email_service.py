@@ -18,7 +18,7 @@ def _send(subject: str, recipients: list, html_body: str) -> None:
     try:
         mail.send(msg)
     except Exception as exc:
-        current_app.logger.error("Mail send failed: %s", exc)
+        current_app.logger.exception("Mail send failed")
 
 
 # ── Email templates (inline for portability) ──────────────────────────────────
