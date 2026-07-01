@@ -44,7 +44,7 @@ class Product(db.Model):
     def primary_image_url(self) -> str:
         img = self.primary_image
         if img:
-            return f"/uploads/products/{img.filename}"
+            return img.filename
         return "/static/images/no-image.png"
 
     @property
