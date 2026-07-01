@@ -17,4 +17,4 @@ class ProductImage(db.Model):
 
     @property
     def url(self) -> str:
-        return f"/uploads/products/{self.filename}"
+        return self.filename
