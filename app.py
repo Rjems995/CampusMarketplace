@@ -28,7 +28,7 @@ def create_app(config_class=None):
     migrate.init_app(app, db)
     socketio.init_app(
         app,
-        async_mode=app.config.get("SOCKETIO_ASYNC_MODE", "gevent"),
+        async_mode="threading",
         cors_allowed_origins="*",
     )
 
@@ -121,4 +121,4 @@ def create_app(config_class=None):
 app = create_app()
 
 if __name__ == "__main__":
-    socketio.run(app, debug=True, host="0.0.0.0", port=5000)
+    app.run(host="0.0.0.0", port=5000, debug=False)
