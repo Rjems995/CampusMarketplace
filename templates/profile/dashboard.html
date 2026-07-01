@@ -20,7 +20,7 @@
             <p class="mb-0 opacity-75 small">
               {% if not current_user.email_confirmed %}
                 <i class="bi bi-exclamation-triangle-fill me-1"></i>
-                Please <a href="{{ url_for('auth.resend_verification') }}" class="text-white fw-semibold">verify your email</a> to unlock all features.
+                Please <span class="text-white fw-semibold">verify your email</span> to unlock all features.
               {% else %}
                 Your account is active and verified.
               {% endif %}
