@@ -67,7 +67,7 @@ class User(UserMixin, db.Model):
     @property
     def avatar_url(self) -> str:
         if self.profile and self.profile.profile_picture:
-            return f"/uploads/{self.profile.profile_picture}"
+            return self.profile.profile_picture
         return "/static/images/default-avatar.png"
 
     @property
