@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block footer %}{% endblock %}
+{% block content %}
+<div class="min-vh-100 d-flex align-items-center bg-light py-5">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-md-6">
+        <div class="text-center mb-4">
+          <a href="{{ url_for('main.index') }}" class="text-decoration-none">
+            <i class="bi bi-shop display-5 text-primary"></i>
+            <h4 class="fw-bold mt-2">{{ app_name }}</h4>
+          </a>
+          <p class="text-muted">Create your free student account.</p>
+        </div>
+        <div class="card border-0 shadow-sm">
+          <div class="card-body p-4">
+            <form method="POST" novalidate>
+              {{ form.hidden_tag() }}
+              <div class="row g-3 mb-3">
+                <div class="col">
+                  <label class="form-label fw-semibold">First Name</label>
+                  {{ form.first_name(class="form-control" + (" is-invalid" if form.first_name.errors else ""), placeholder="Juan") }}
+                  {% for e in form.first_name.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
+                </div>
+                <div class="col">
+                  <label class="form-label fw-semibold">Last Name</label>
+                  {{ form.last_name(class="form-control" + (" is-invalid" if form.last_name.errors else ""), placeholder="dela Cruz") }}
+                  {% for e in form.last_name.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
+                </div>
+              </div>
+              <div class="mb-3">
+                <label class="form-label fw-semibold">Email</label>
+                {{ form.email(class="form-control" + (" is-invalid" if form.email.errors else ""), placeholder="you@school.edu") }}
+                {% for e in form.email.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
+              </div>
+              <div class="mb-3">
+                <label class="form-label fw-semibold">Password</label>
+                {{ form.password(class="form-control" + (" is-invalid" if form.password.errors else ""), placeholder="At least 8 characters") }}
+                {% for e in form.password.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
+              </div>
+              <div class="mb-4">
+                <label class="form-label fw-semibold">Confirm Password</label>
+                {{ form.confirm(class="form-control" + (" is-invalid" if form.confirm.errors else ""), placeholder="Repeat password") }}
+                {% for e in form.confirm.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
+              </div>
+              <p class="small text-muted mb-3">
+                By signing up, you agree to our Terms of Service and confirm you are a current student.
+              </p>
+              {{ form.submit(class="btn btn-primary w-100 py-2 fw-semibold") }}
+            </form>
+          </div>
+        </div>
+        <p class="text-center mt-3 small text-muted">
+          Already have an account? <a href="{{ url_for('auth.login') }}" class="text-primary fw-semibold">Log in</a>
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

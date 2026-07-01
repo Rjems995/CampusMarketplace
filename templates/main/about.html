@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container py-5" style="max-width:800px;">
+  <div class="text-center mb-5">
+    <i class="bi bi-shop display-3 text-primary mb-3 d-block"></i>
+    <h1 class="fw-black">About {{ app_name }}</h1>
+    <p class="lead text-muted">A safer way for students to buy, sell, and trade on campus.</p>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-md-4 text-center">
+      <i class="bi bi-shield-check fs-1 text-primary mb-3 d-block"></i>
+      <h5 class="fw-bold">Safe & Trusted</h5>
+      <p class="text-muted small">All users are verified students. Meet face-to-face on campus for secure transactions.</p>
+    </div>
+    <div class="col-md-4 text-center">
+      <i class="bi bi-lightning-charge fs-1 text-primary mb-3 d-block"></i>
+      <h5 class="fw-bold">Fast & Easy</h5>
+      <p class="text-muted small">Post a listing in under 2 minutes. Real-time chat gets deals done fast.</p>
+    </div>
+    <div class="col-md-4 text-center">
+      <i class="bi bi-people fs-1 text-primary mb-3 d-block"></i>
+      <h5 class="fw-bold">Community First</h5>
+      <p class="text-muted small">Built exclusively for students, by students. Keep money within your campus community.</p>
+    </div>
+  </div>
+
+  <hr class="my-5">
+
+  <h3 class="fw-bold mb-4">How It Works</h3>
+  <div class="row g-3">
+    {% for step, icon, text in [
+      ('1. Create an Account', 'bi-person-plus', 'Register with your student email. Verify your account to unlock all features.'),
+      ('2. Post Your Listing', 'bi-camera',       'Upload photos, set a price, and describe your item. It takes less than 2 minutes.'),
+      ('3. Chat & Meet',       'bi-chat-dots',    'Buyers message you directly. Arrange to meet in a safe spot on campus.'),
+      ('4. Complete the Sale', 'bi-check-circle', 'Hand over the item, receive payment, and mark the listing as sold.'),
+    ] %}
+    <div class="col-md-6">
+      <div class="card border-0 bg-light p-3 h-100">
+        <div class="d-flex gap-3 align-items-start">
+          <i class="bi {{ icon }} fs-3 text-primary flex-shrink-0"></i>
+          <div>
+            <h6 class="fw-bold mb-1">{{ step }}</h6>
+            <p class="text-muted small mb-0">{{ text }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <div class="text-center mt-5">
+    {% if not current_user.is_authenticated %}
+    <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-lg rounded-pill px-5 fw-semibold">
+      <i class="bi bi-rocket-takeoff me-2"></i>Get Started Free
+    </a>
+    {% else %}
+    <a href="{{ url_for('marketplace.create_listing') }}" class="btn btn-primary btn-lg rounded-pill px-5 fw-semibold">
+      <i class="bi bi-plus-circle me-2"></i>Post a Listing
+    </a>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

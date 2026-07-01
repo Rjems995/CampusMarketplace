@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container-fluid py-4 px-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="fw-bold mb-0">Manage Listings</h4>
+    <a href="{{ url_for('admin.dashboard') }}" class="btn btn-sm btn-outline-secondary">← Dashboard</a>
+  </div>
+
+  <ul class="nav nav-pills mb-4">
+    {% for s in ['', 'available', 'sold', 'removed'] %}
+    <li class="nav-item">
+      <a class="nav-link {{ 'active' if status == s }}"
+         href="{{ url_for('admin.listings', status=s) }}">
+        {{ 'All' if not s else s | title }}
+      </a>
+    </li>
+    {% endfor %}
+  </ul>
+
+  <div class="card border-0 shadow-sm">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0 small">
+        <thead class="table-light text-muted">
+          <tr><th>Listing</th><th>Seller</th><th>Category</th><th>Price</th><th>Status</th><th>Featured</th><th>Actions</th></tr>
+        </thead>
+        <tbody>
+          {% for p in products %}
+          <tr>
+            <td>
+              <div class="d-flex align-items-center gap-2">
+                <img src="{{ p.primary_image_url }}" class="rounded-2" width="40" height="36" style="object-fit:cover;">
+                <a href="{{ url_for('marketplace.listing_detail', slug=p.slug) }}"
+                   class="text-decoration-none text-dark fw-semibold text-truncate" style="max-width:160px;">
+                  {{ p.title }}
+                </a>
+              </div>
+            </td>
+            <td>{{ p.seller.full_name }}</td>
+            <td>{{ p.category.name }}</td>
+            <td class="text-primary fw-bold">{{ p.price | currency }}</td>
+            <td>
+              <span class="badge rounded-pill
+                {{ 'bg-success-subtle text-success' if p.status == 'available' else
+                   'bg-secondary-subtle text-secondary' if p.status == 'sold' else
+                   'bg-danger-subtle text-danger' }}">
+                {{ p.status | title }}
+              </span>
+            </td>
+            <td>
+              <button class="btn btn-sm {{ 'btn-warning' if p.is_featured else 'btn-outline-secondary' }} feature-btn"
+                      data-product-id="{{ p.id }}" title="Toggle featured">
+                <i class="bi bi-star{{ '-fill' if p.is_featured }}"></i>
+              </button>
+            </td>
+            <td>
+              {% if p.status == 'available' %}
+              <form method="POST" action="{{ url_for('admin.remove_listing', product_id=p.id) }}" class="d-inline">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button class="btn btn-sm btn-outline-danger"
+                        onclick="return confirm('Remove this listing?')">
+                  <i class="bi bi-trash me-1"></i>Remove
+                </button>
+              </form>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  {% if pagination.pages > 1 %}
+  <nav class="mt-4"><ul class="pagination justify-content-center">
+    {% for p in pagination.iter_pages() %}
+      {% if p %}<li class="page-item {{ 'active' if p == pagination.page }}">
+        <a class="page-link" href="{{ url_for('admin.listings', status=status, page=p) }}">{{ p }}</a>
+      </li>{% else %}<li class="page-item disabled"><span class="page-link">…</span></li>{% endif %}
+    {% endfor %}
+  </ul></nav>
+  {% endif %}
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+document.querySelectorAll('.feature-btn').forEach(btn => {
+  btn.addEventListener('click', async function() {
+    const pid = this.dataset.productId;
+    const res = await fetch(`/admin/listings/${pid}/feature`, {
+      method: 'POST', headers: { 'X-CSRFToken': '{{ csrf_token() }}' }
+    });
+    const data = await res.json();
+    this.className = `btn btn-sm ${data.featured ? 'btn-warning' : 'btn-outline-secondary'} feature-btn`;
+    this.innerHTML = `<i class="bi bi-star${data.featured ? '-fill' : ''}"></i>`;
+  });
+});
+</script>
+{% endblock %}

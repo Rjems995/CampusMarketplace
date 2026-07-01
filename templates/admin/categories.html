@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container-fluid py-4 px-4" style="max-width:860px;">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="fw-bold mb-0">Manage Categories</h4>
+    <a href="{{ url_for('admin.dashboard') }}" class="btn btn-sm btn-outline-secondary">← Dashboard</a>
+  </div>
+
+  <!-- Create form -->
+  <div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-transparent border-0 pt-3 px-4">
+      <h6 class="fw-bold mb-0"><i class="bi bi-plus-circle me-2 text-primary"></i>Add New Category</h6>
+    </div>
+    <div class="card-body px-4 pb-4">
+      <form method="POST" action="{{ url_for('admin.create_category') }}" class="row g-2 align-items-end">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="col-md-4">
+          <label class="form-label small fw-semibold">Name</label>
+          <input type="text" name="name" class="form-control form-control-sm" placeholder="Category name" required>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label small fw-semibold">Bootstrap Icon</label>
+          <input type="text" name="icon" class="form-control form-control-sm"
+                 placeholder="bi-tag" value="bi-tag">
+        </div>
+        <div class="col-md-4">
+          <label class="form-label small fw-semibold">Description</label>
+          <input type="text" name="description" class="form-control form-control-sm" placeholder="Short description">
+        </div>
+        <div class="col-md-1">
+          <button type="submit" class="btn btn-primary btn-sm w-100">Add</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- List -->
+  <div class="card border-0 shadow-sm">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0 small">
+        <thead class="table-light text-muted">
+          <tr><th>Icon</th><th>Name</th><th>Slug</th><th>Description</th><th>Listings</th><th>Active</th><th>Actions</th></tr>
+        </thead>
+        <tbody>
+          {% for cat in categories %}
+          <tr>
+            <td><i class="bi {{ cat.icon }} fs-5 text-primary"></i></td>
+            <td class="fw-semibold">{{ cat.name }}</td>
+            <td class="text-muted">{{ cat.slug }}</td>
+            <td class="text-muted text-truncate" style="max-width:180px;">{{ cat.description or '—' }}</td>
+            <td>{{ cat.product_count }}</td>
+            <td>
+              <button class="btn btn-sm toggle-cat-btn
+                {{ 'btn-success' if cat.is_active else 'btn-outline-secondary' }}"
+                      data-cat-id="{{ cat.id }}">
+                {{ 'Active' if cat.is_active else 'Hidden' }}
+              </button>
+            </td>
+            <td>
+              {% if not cat.products %}
+              <form method="POST" action="{{ url_for('admin.delete_category', cat_id=cat.id) }}" class="d-inline">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button class="btn btn-sm btn-outline-danger"
+                        onclick="return confirm('Delete {{ cat.name }}?')">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </form>
+              {% else %}
+              <span class="text-muted small">Has listings</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+document.querySelectorAll('.toggle-cat-btn').forEach(btn => {
+  btn.addEventListener('click', async function() {
+    const catId = this.dataset.catId;
+    const res = await fetch(`/admin/categories/${catId}/toggle`, {
+      method: 'POST', headers: { 'X-CSRFToken': '{{ csrf_token() }}' }
+    });
+    const data = await res.json();
+    this.className = `btn btn-sm toggle-cat-btn ${data.active ? 'btn-success' : 'btn-outline-secondary'}`;
+    this.textContent = data.active ? 'Active' : 'Hidden';
+  });
+});
+</script>
+{% endblock %}

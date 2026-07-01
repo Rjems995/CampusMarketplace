@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container-fluid py-4 px-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="fw-bold mb-0">Moderate Reviews</h4>
+    <a href="{{ url_for('admin.dashboard') }}" class="btn btn-sm btn-outline-secondary">← Dashboard</a>
+  </div>
+  <div class="card border-0 shadow-sm">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0 small">
+        <thead class="table-light text-muted">
+          <tr><th>Reviewer</th><th>Seller</th><th>Rating</th><th>Comment</th><th>Status</th><th>Actions</th></tr>
+        </thead>
+        <tbody>
+          {% for r in reviews %}
+          <tr>
+            <td>{{ r.reviewer.full_name }}</td>
+            <td>{{ r.reviewee.full_name }}</td>
+            <td>
+              <span class="text-warning">
+                {% for i in range(r.rating) %}<i class="bi bi-star-fill"></i>{% endfor %}
+              </span>
+            </td>
+            <td class="text-muted text-truncate" style="max-width:200px;">{{ r.comment or '—' }}</td>
+            <td>
+              <span class="badge rounded-pill {{ 'bg-success-subtle text-success' if r.is_approved else 'bg-secondary-subtle text-secondary' }}">
+                {{ 'Approved' if r.is_approved else 'Hidden' }}
+              </span>
+            </td>
+            <td>
+              <button class="btn btn-sm toggle-review-btn
+                {{ 'btn-outline-secondary' if r.is_approved else 'btn-success' }}"
+                      data-review-id="{{ r.id }}">
+                {{ 'Hide' if r.is_approved else 'Approve' }}
+              </button>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+document.querySelectorAll('.toggle-review-btn').forEach(btn => {
+  btn.addEventListener('click', async function() {
+    const rid = this.dataset.reviewId;
+    const res = await fetch(`/admin/reviews/${rid}/toggle`, {
+      method: 'POST', headers: { 'X-CSRFToken': '{{ csrf_token() }}' }
+    });
+    const data = await res.json();
+    this.className = `btn btn-sm toggle-review-btn ${data.approved ? 'btn-outline-secondary' : 'btn-success'}`;
+    this.textContent = data.approved ? 'Hide' : 'Approve';
+  });
+});
+</script>
+{% endblock %}

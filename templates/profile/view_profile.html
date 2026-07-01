@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container py-5">
+  <div class="row g-4">
+    <div class="col-lg-4">
+      <!-- Profile card -->
+      <div class="card border-0 shadow-sm text-center">
+        <div class="card-body p-4">
+          <img src="{{ viewed_user.avatar_url }}"
+               class="rounded-circle mb-3 border border-3 border-primary-subtle"
+               width="100" height="100" style="object-fit:cover;">
+          <h4 class="fw-bold mb-1">{{ viewed_user.full_name }}</h4>
+          {% if viewed_user.profile %}
+            {% if viewed_user.profile.course %}
+            <div class="text-muted small">{{ viewed_user.profile.course }}
+              {% if viewed_user.profile.year_level %} · {{ viewed_user.profile.year_level }}{% endif %}
+            </div>
+            {% endif %}
+            {% if viewed_user.profile.school %}
+            <div class="small text-muted"><i class="bi bi-building me-1"></i>{{ viewed_user.profile.school }}</div>
+            {% endif %}
+            {% if viewed_user.profile.location %}
+            <div class="small text-muted"><i class="bi bi-geo-alt me-1"></i>{{ viewed_user.profile.location }}</div>
+            {% endif %}
+            {% if viewed_user.profile.average_rating > 0 %}
+            <div class="my-2 text-warning">
+              {% for i in range(viewed_user.profile.average_rating | int) %}<i class="bi bi-star-fill"></i>{% endfor %}
+              {% for i in range(5 - (viewed_user.profile.average_rating | int)) %}<i class="bi bi-star"></i>{% endfor %}
+              <span class="text-muted small ms-1">{{ viewed_user.profile.average_rating }} ({{ viewed_user.profile.total_reviews }})</span>
+            </div>
+            {% endif %}
+            {% if viewed_user.profile.bio %}
+            <p class="text-muted small mt-2 mb-0">{{ viewed_user.profile.bio }}</p>
+            {% endif %}
+          {% endif %}
+
+          <div class="d-flex justify-content-center gap-3 mt-3">
+            <div class="text-center">
+              <div class="fw-bold">{{ listings | length }}</div>
+              <div class="text-muted smaller">Listings</div>
+            </div>
+            <div class="vr"></div>
+            {% if viewed_user.profile %}
+            <div class="text-center">
+              <div class="fw-bold">{{ viewed_user.profile.total_sales }}</div>
+              <div class="text-muted smaller">Sold</div>
+            </div>
+            <div class="vr"></div>
+            {% endif %}
+            <div class="text-center">
+              <div class="fw-bold">{{ reviews | length }}</div>
+              <div class="text-muted smaller">Reviews</div>
+            </div>
+          </div>
+
+          <div class="mt-3 d-flex gap-2 justify-content-center">
+            <span class="badge bg-secondary-subtle text-secondary rounded-pill small">
+              Member since {{ viewed_user.created_at.strftime('%b %Y') }}
+            </span>
+            {% if viewed_user.profile and viewed_user.profile.is_online %}
+            <span class="badge bg-success rounded-pill small">Online</span>
+            {% endif %}
+          </div>
+
+          {% if current_user.is_authenticated and current_user.id != viewed_user.id %}
+          <div class="mt-3">
+            <a href="{{ url_for('chat.start_conversation', product_id=listings[0].id) if listings else '#' }}"
+               class="btn btn-primary btn-sm rounded-pill px-3">
+              <i class="bi bi-chat-dots me-1"></i>Message
+            </a>
+          </div>
+          {% elif current_user.is_authenticated and current_user.id == viewed_user.id %}
+          <div class="mt-3">
+            <a href="{{ url_for('profile.edit_profile') }}" class="btn btn-outline-secondary btn-sm rounded-pill">
+              <i class="bi bi-pencil me-1"></i>Edit Profile
+            </a>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-8">
+      <!-- Listings -->
+      <h5 class="fw-bold mb-3">Active Listings</h5>
+      {% if listings %}
+      <div class="row g-3 mb-5">
+        {% for product in listings %}
+          {% include "marketplace/_product_card.html" %}
+        {% endfor %}
+      </div>
+      {% else %}
+      <p class="text-muted">No active listings.</p>
+      {% endif %}
+
+      <!-- Reviews -->
+      <h5 class="fw-bold mb-3">Reviews ({{ reviews | length }})</h5>
+      {% if reviews %}
+        {% for r in reviews %}
+        <div class="card border-0 shadow-sm mb-2">
+          <div class="card-body py-3 px-4">
+            <div class="d-flex justify-content-between align-items-start">
+              <div class="d-flex gap-2 align-items-center">
+                <img src="{{ r.reviewer.avatar_url }}" class="rounded-circle"
+                     width="36" height="36" style="object-fit:cover;">
+                <div>
+                  <a href="{{ url_for('profile.view_profile', user_id=r.reviewer.id) }}"
+                     class="fw-semibold small text-dark text-decoration-none">{{ r.reviewer.full_name }}</a>
+                  <div class="text-muted smaller">{{ r.created_at | time_ago }}</div>
+                </div>
+              </div>
+              <div class="text-warning">
+                {% for i in range(r.rating) %}<i class="bi bi-star-fill"></i>{% endfor %}
+                {% for i in range(5 - r.rating) %}<i class="bi bi-star text-muted"></i>{% endfor %}
+              </div>
+            </div>
+            {% if r.comment %}
+            <p class="mb-0 mt-2 small text-secondary">{{ r.comment }}</p>
+            {% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      {% else %}
+        <p class="text-muted">No reviews yet.</p>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container py-4">
+  <div class="row g-4">
+    <!-- Filters sidebar -->
+    <div class="col-lg-3">
+      <div class="card border-0 shadow-sm sticky-top" style="top:80px;">
+        <div class="card-body">
+          <h6 class="fw-bold mb-3"><i class="bi bi-funnel me-2"></i>Filters</h6>
+          <form method="GET" action="{{ url_for('main.search') }}" id="filterForm">
+            {% if q %}<input type="hidden" name="q" value="{{ q }}">{% endif %}
+
+            <div class="mb-3">
+              <label class="form-label small fw-semibold">Category</label>
+              <select name="category" class="form-select form-select-sm" onchange="this.form.submit()">
+                <option value="">All Categories</option>
+                {% for cat in categories %}
+                <option value="{{ cat.slug }}" {{ 'selected' if category == cat.slug }}>{{ cat.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label small fw-semibold">Price Range (₱)</label>
+              <div class="row g-1">
+                <div class="col"><input type="number" name="min_price" class="form-control form-control-sm" placeholder="Min" value="{{ min_price or '' }}" min="0"></div>
+                <div class="col"><input type="number" name="max_price" class="form-control form-control-sm" placeholder="Max" value="{{ max_price or '' }}" min="0"></div>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label small fw-semibold">Condition</label>
+              {% for cond in ['New','Like New','Good','Fair','Poor'] %}
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="condition" id="cond_{{ cond }}"
+                       value="{{ cond }}" {{ 'checked' if condition == cond }}>
+                <label class="form-check-label small" for="cond_{{ cond }}">{{ cond }}</label>
+              </div>
+              {% endfor %}
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label small fw-semibold">Location</label>
+              <input type="text" name="location" class="form-control form-control-sm"
+                     placeholder="e.g. Diliman" value="{{ location }}">
+            </div>
+
+            <div class="d-grid gap-2">
+              <button type="submit" class="btn btn-primary btn-sm">Apply Filters</button>
+              <a href="{{ url_for('main.search') }}{% if q %}?q={{ q }}{% endif %}"
+                 class="btn btn-outline-secondary btn-sm">Clear</a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Results -->
+    <div class="col-lg-9">
+      <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+        <div>
+          {% if q %}
+          <h5 class="fw-bold mb-0">Results for "<em>{{ q }}</em>"</h5>
+          {% else %}
+          <h5 class="fw-bold mb-0">Browse Listings</h5>
+          {% endif %}
+          <span class="text-muted small">{{ pagination.total }} listing{{ 's' if pagination.total != 1 }}</span>
+        </div>
+        <select name="sort" class="form-select form-select-sm w-auto" onchange="applySortChange(this.value)">
+          <option value="newest"     {{ 'selected' if sort == 'newest' }}>Newest First</option>
+          <option value="oldest"     {{ 'selected' if sort == 'oldest' }}>Oldest First</option>
+          <option value="price_asc"  {{ 'selected' if sort == 'price_asc' }}>Price: Low → High</option>
+          <option value="price_desc" {{ 'selected' if sort == 'price_desc' }}>Price: High → Low</option>
+          <option value="popular"    {{ 'selected' if sort == 'popular' }}>Most Viewed</option>
+        </select>
+      </div>
+
+      {% if products %}
+      <div class="row g-3">
+        {% for product in products %}
+          {% include "marketplace/_product_card.html" %}
+        {% endfor %}
+      </div>
+
+      <!-- Pagination -->
+      {% if pagination.pages > 1 %}
+      <nav class="mt-4">
+        <ul class="pagination justify-content-center">
+          <li class="page-item {{ 'disabled' if not pagination.has_prev }}">
+            <a class="page-link" href="{{ request.url | replace('page=' + request.args.get('page','1'), 'page=' + (pagination.prev_num | string)) if pagination.has_prev else '#' }}">Previous</a>
+          </li>
+          {% for p in pagination.iter_pages(left_edge=2, right_edge=2, left_current=2, right_current=2) %}
+            {% if p %}
+              <li class="page-item {{ 'active' if p == pagination.page }}">
+                <a class="page-link" href="{{ request.url | replace('page=' + request.args.get('page','1'), 'page=' + p | string) }}">{{ p }}</a>
+              </li>
+            {% else %}
+              <li class="page-item disabled"><span class="page-link">…</span></li>
+            {% endif %}
+          {% endfor %}
+          <li class="page-item {{ 'disabled' if not pagination.has_next }}">
+            <a class="page-link" href="{{ request.url | replace('page=' + request.args.get('page','1'), 'page=' + (pagination.next_num | string)) if pagination.has_next else '#' }}">Next</a>
+          </li>
+        </ul>
+      </nav>
+      {% endif %}
+
+      {% else %}
+      <div class="text-center py-5">
+        <i class="bi bi-search display-1 text-muted"></i>
+        <h4 class="mt-3 fw-bold">No listings found</h4>
+        <p class="text-muted">Try adjusting your search or filters.</p>
+        <a href="{{ url_for('main.search') }}" class="btn btn-primary rounded-pill">Clear all filters</a>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+function applySortChange(sort) {
+  const url = new URL(window.location.href);
+  url.searchParams.set('sort', sort);
+  url.searchParams.set('page', 1);
+  window.location.href = url.toString();
+}
+</script>
+{% endblock %}

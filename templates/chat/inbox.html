@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container py-5">
+  <h4 class="fw-bold mb-4"><i class="bi bi-chat-dots me-2 text-primary"></i>Messages</h4>
+
+  {% if conversations %}
+  <div class="card border-0 shadow-sm">
+    {% for conv in conversations %}
+    {% set other = conv.other_party(current_user.id) %}
+    {% set unread = conv.unread_for(current_user.id) %}
+    <a href="{{ url_for('chat.conversation', conv_id=conv.id) }}"
+       class="d-flex align-items-center gap-3 p-3 border-bottom text-decoration-none
+              {{ 'bg-primary-subtle' if unread > 0 }} hover-bg">
+      <div class="position-relative">
+        <img src="{{ other.avatar_url }}" class="rounded-circle"
+             width="52" height="52" style="object-fit:cover;">
+        {% if other.profile and other.profile.is_online %}
+        <span class="position-absolute bottom-0 end-0 bg-success rounded-circle border border-white"
+              style="width:12px;height:12px;"></span>
+        {% endif %}
+      </div>
+      <div class="flex-grow-1 overflow-hidden">
+        <div class="d-flex justify-content-between align-items-start">
+          <span class="fw-semibold text-dark">{{ other.full_name }}</span>
+          <span class="text-muted smaller ms-2 flex-shrink-0">{{ conv.last_message_at | time_ago }}</span>
+        </div>
+        {% if conv.product %}
+        <div class="text-muted smaller text-truncate">Re: {{ conv.product.title }}</div>
+        {% endif %}
+        {% if conv.messages %}
+        {% set last_msg = conv.messages[-1] %}
+        <div class="text-muted small text-truncate">
+          {% if last_msg.sender_id == current_user.id %}<span class="text-muted">You: </span>{% endif %}
+          {{ last_msg.body or '📷 Photo' }}
+        </div>
+        {% endif %}
+      </div>
+      {% if unread > 0 %}
+      <span class="badge bg-primary rounded-pill flex-shrink-0">{{ unread }}</span>
+      {% endif %}
+    </a>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="text-center py-5">
+    <i class="bi bi-chat-square display-1 text-muted"></i>
+    <h5 class="mt-3">No messages yet</h5>
+    <p class="text-muted">Start a conversation by contacting a seller.</p>
+    <a href="{{ url_for('main.search') }}" class="btn btn-primary rounded-pill">Browse Listings</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

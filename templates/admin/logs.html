@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container-fluid py-4 px-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="fw-bold mb-0">Activity Log</h4>
+    <a href="{{ url_for('admin.dashboard') }}" class="btn btn-sm btn-outline-secondary">← Dashboard</a>
+  </div>
+  <div class="card border-0 shadow-sm">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0 small">
+        <thead class="table-light text-muted">
+          <tr><th>Admin</th><th>Action</th><th>Target</th><th>Detail</th><th>IP</th><th>Time</th></tr>
+        </thead>
+        <tbody>
+          {% for log in logs %}
+          <tr>
+            <td class="fw-semibold">{{ log.admin.full_name }}</td>
+            <td>
+              <span class="badge bg-primary-subtle text-primary rounded-pill">
+                {{ log.action | replace('_',' ') | title }}
+              </span>
+            </td>
+            <td class="text-muted">{{ log.target_type }} #{{ log.target_id }}</td>
+            <td class="text-muted text-truncate" style="max-width:200px;">{{ log.detail or '—' }}</td>
+            <td class="text-muted">{{ log.ip_address or '—' }}</td>
+            <td class="text-muted">{{ log.created_at | time_ago }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% if pagination.pages > 1 %}
+  <nav class="mt-4"><ul class="pagination justify-content-center">
+    {% for p in pagination.iter_pages() %}
+      {% if p %}<li class="page-item {{ 'active' if p == pagination.page }}">
+        <a class="page-link" href="{{ url_for('admin.logs', page=p) }}">{{ p }}</a>
+      </li>{% else %}<li class="page-item disabled"><span class="page-link">…</span></li>{% endif %}
+    {% endfor %}
+  </ul></nav>
+  {% endif %}
+</div>
+{% endblock %}

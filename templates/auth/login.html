@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block footer %}{% endblock %}
+{% block content %}
+<div class="min-vh-100 d-flex align-items-center bg-light py-5">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-md-5">
+        <div class="text-center mb-4">
+          <a href="{{ url_for('main.index') }}" class="text-decoration-none">
+            <i class="bi bi-shop display-5 text-primary"></i>
+            <h4 class="fw-bold mt-2">{{ app_name }}</h4>
+          </a>
+          <p class="text-muted">Welcome back! Log in to your account.</p>
+        </div>
+        <div class="card border-0 shadow-sm">
+          <div class="card-body p-4">
+            <form method="POST" novalidate>
+              {{ form.hidden_tag() }}
+              <div class="mb-3">
+                <label class="form-label fw-semibold">Email</label>
+                {{ form.email(class="form-control" + (" is-invalid" if form.email.errors else ""), placeholder="you@school.edu") }}
+                {% for e in form.email.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
+              </div>
+              <div class="mb-3">
+                <div class="d-flex justify-content-between">
+                  <label class="form-label fw-semibold">Password</label>
+                  <a href="{{ url_for('auth.forgot_password') }}" class="small text-primary">Forgot password?</a>
+                </div>
+                {{ form.password(class="form-control" + (" is-invalid" if form.password.errors else ""), placeholder="••••••••") }}
+                {% for e in form.password.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
+              </div>
+              <div class="mb-4 form-check">
+                {{ form.remember(class="form-check-input") }}
+                <label class="form-check-label small">Remember me for 30 days</label>
+              </div>
+              {{ form.submit(class="btn btn-primary w-100 py-2 fw-semibold") }}
+            </form>
+          </div>
+        </div>
+        <p class="text-center mt-3 small text-muted">
+          Don't have an account? <a href="{{ url_for('auth.register') }}" class="text-primary fw-semibold">Sign up free</a>
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
