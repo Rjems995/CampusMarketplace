@@ -13,6 +13,12 @@ def create_app(config_class=None):
     app = Flask(__name__)
     app.config.from_object(config_class or get_config())
 
+    print("MAIL_SERVER:", app.config["MAIL_SERVER"])
+    print("MAIL_PORT:", app.config["MAIL_PORT"])
+    print("MAIL_USE_TLS:", app.config["MAIL_USE_TLS"])
+    print("MAIL_USERNAME:", app.config["MAIL_USERNAME"])
+    print("MAIL_DEFAULT_SENDER:", app.config["MAIL_DEFAULT_SENDER"])
+
     # ── Init extensions ───────────────────────────────────────────────────
     db.init_app(app)
     bcrypt.init_app(app)
