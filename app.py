@@ -104,6 +104,10 @@ def create_app(config_class=None):
     from commands import register_commands
     register_commands(app)
 
+    # Create database tables if they don't exist
+    with app.app_context():
+    db.create_all()
+
     return app
 
 
