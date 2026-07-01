@@ -108,13 +108,6 @@ def create_app(config_class=None):
     with app.app_context():
         db.create_all()
 
-        from models.category import Category
-
-    # Seed database if it's empty
-        if Category.query.count() == 0:
-            from commands import seed_db
-            seed_db.callback()
-
     return app
 
 
