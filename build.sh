@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
 pip install -r requirements.txt
 
-flask db upgrade
-flask seed-db
+python -m flask seed-db
