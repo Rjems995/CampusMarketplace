@@ -11,6 +11,7 @@ from models.product import Product
 from models.user import User
 from utils.helpers import save_image, create_notification
 from services.email_service import send_new_message_email
+from datetime import datetime
 
 chat_bp = Blueprint("chat", __name__, url_prefix="/chat")
 
@@ -27,7 +28,7 @@ def inbox():
     # Merge and deduplicate
     seen = set()
     conversations = []
-    for c in sorted(buyer_convs + seller_convs, key=lambda x: x.last_message_at, reverse=True):
+    for c in sorted(buyer_convs + seller_convs, key=lambda x: x.last_message_at or datetime.min, reverse=True):
         if c.id not in seen:
             seen.add(c.id)
             conversations.append(c)
