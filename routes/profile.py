@@ -50,13 +50,15 @@ def dashboard():
 
 @profile_bp.route("/user/<int:user_id>")
 def view_profile(user_id):
-    user     = User.query.get_or_404(user_id)
-    listings = Product.query.filter_by(seller_id=user_id, status="available").order_by(Product.created_at.desc()).all()
-    reviews  = Review.query.filter_by(reviewee_id=user_id, is_approved=True).order_by(Review.created_at.desc()).all()
+    user          = User.query.get_or_404(user_id)
+    listings      = Product.query.filter_by(seller_id=user_id, status="available").order_by(Product.created_at.desc()).all()
+    sold_listings = Product.query.filter_by(seller_id=user_id, status="sold").order_by(Product.sold_at.desc()).all()
+    reviews       = Review.query.filter_by(reviewee_id=user_id, is_approved=True).order_by(Review.created_at.desc()).all()
     return render_template(
         "profile/view_profile.html",
         viewed_user=user,
         listings=listings,
+        sold_listings=sold_listings,
         reviews=reviews,
         title=user.full_name,
     )
