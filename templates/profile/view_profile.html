@@ -90,7 +90,17 @@
         {% endfor %}
       </div>
       {% else %}
-      <p class="text-muted">No active listings.</p>
+      <p class="text-muted mb-5">No active listings.</p>
+      {% endif %}
+
+      <!-- Sold listings -->
+      {% if sold_listings %}
+      <h5 class="fw-bold mb-3">Sold Items</h5>
+      <div class="row g-3 mb-5">
+        {% for product in sold_listings %}
+          {% include "marketplace/_product_card.html" %}
+        {% endfor %}
+      </div>
       {% endif %}
 
       <!-- Reviews -->
