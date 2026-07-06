@@ -51,9 +51,7 @@ class Message(db.Model):
 
     @property
     def image_url(self):
-        if self.image_filename:
-            return f"/uploads/messages/{self.image_filename}"
-        return None
+        return self.image_filename
 
     def to_dict(self) -> dict:
         return {
