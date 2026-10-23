@@ -73,15 +73,15 @@ SCHOOL_EMAIL_DOMAIN=@your.edu.ph
 psql -U postgres -c "CREATE DATABASE campus_marketplace;"
 
 # Apply schema
-psql -U postgres -d campus_marketplace -f database/schema.sql
+psql -U postgres -d campus_marketplace -f backend/database/schema.sql
 
 # Seed categories and admin user
-psql -U postgres -d campus_marketplace -f database/seed.sql
+psql -U postgres -d campus_marketplace -f backend/database/seed.sql
 ```
 
 ### 6. Generate placeholder images
 ```bash
-python utils/create_placeholders.py
+python -m backend.utils.create_placeholders
 ```
 
 ### 7. Run the application
@@ -110,70 +110,28 @@ Open **http://localhost:5000**
 
 ```
 CampusMarketplace/
-├── app.py                  # Application factory & entry point
-├── config.py               # Environment-based configuration
-├── extensions.py           # Flask extension instances
-├── requirements.txt
-├── .env.example
-│
-├── database/
-│   ├── schema.sql          # Full PostgreSQL schema
-│   └── seed.sql            # Categories + admin user
-│
-├── models/                 # SQLAlchemy models (one per file)
-│   ├── user.py
-│   ├── profile.py
-│   ├── product.py
-│   ├── category.py
-│   ├── conversation.py     # + Message
-│   ├── review.py
-│   ├── notification.py
-│   ├── report.py
-│   ├── admin_log.py
-│   └── token.py            # EmailVerification + PasswordReset
-│
-├── routes/                 # Blueprint route handlers
-│   ├── main.py             # Homepage, search
-│   ├── auth.py             # Login, register, password
-│   ├── marketplace.py      # Listings CRUD, favorites, reports
-│   ├── profile.py          # Dashboard, profile, notifications
-│   ├── chat.py             # Messaging + SocketIO events
-│   └── admin.py            # Admin panel
-│
-├── forms/                  # WTForms
-│   ├── auth_forms.py
-│   ├── product_forms.py
-│   └── profile_forms.py
-│
-├── services/
-│   └── email_service.py    # Transactional email templates
-│
-├── utils/
-│   ├── helpers.py          # Image utils, slug, tokens, notifications
-│   └── create_placeholders.py
-│
-├── middleware/
-│   └── decorators.py       # admin_required, verified_required
-│
-├── templates/
-│   ├── base.html           # Master layout with navbar + footer
-│   ├── main/               # Homepage, about
-│   ├── auth/               # Login, register, password pages
-│   ├── marketplace/        # Listings, search, category
-│   ├── profile/            # Dashboard, profile, settings
-│   ├── chat/               # Inbox, conversation
-│   ├── admin/              # Admin dashboard + management pages
-│   └── errors/             # 403, 404, 500
-│
-├── static/
-│   ├── css/main.css        # Custom styles + design tokens
-│   ├── js/main.js          # Dark mode, toasts, SocketIO, favorites
-│   └── images/             # Placeholder images
-│
-└── uploads/                # User-uploaded files (gitignored)
-    ├── products/
-    ├── avatars/
-    └── messages/
++-- app.py                  # Root launcher (python app.py / flask run)
++-- requirements.txt        # Includes backend dependencies
++-- requirements-dev.txt    # Dependencies plus pytest
++-- .env                    # Local environment (not committed)
++-- frontend/
+|   +-- templates/          # Jinja pages, layouts, and partials
+|   +-- static/             # CSS, JavaScript, images
++-- backend/
+|   +-- app.py              # Application factory
+|   +-- config.py           # Environment-based configuration
+|   +-- extensions.py       # Shared Flask extensions
+|   +-- commands.py         # Database and admin CLI commands
+|   +-- database/           # SQL schema and seed
+|   +-- models/             # SQLAlchemy models
+|   +-- routes/             # HTTP and Socket.IO handlers
+|   +-- forms/              # Server-side validation
+|   +-- services/           # Transactional email
+|   +-- middleware/         # Access-control decorators
+|   +-- utils/              # Image and token helpers
+|   +-- tests/              # Automated tests
++-- instance/               # Existing local database stays here
++-- uploads/                # Existing user uploads stay here
 ```
 
 ---
@@ -214,3 +172,22 @@ CampusMarketplace/
 ## 📄 License
 
 MIT — free to use for educational and portfolio purposes.
+
+## Development and verification
+
+Run commands from the project root. The frontend is rendered by Flask; it does not need a separate Node server or build step. Flask resolves templates and static files using absolute paths into frontend/. Backend imports use the backend package. Existing .env, instance database files, and uploads remain at the project root so the reorganization preserves local data paths.
+
+Create a fresh virtual environment if the bundled venv refers to a Python installation on another computer:
+
+```powershell
+python -m venv .venv
+.venv\Scripts\Activate.ps1
+python -m pip install -r requirements-dev.txt
+python -m unittest backend.tests.test_ui_regressions -v
+python -m pytest backend/tests -v
+python app.py
+```
+
+Tests use an in-memory SQLite database, temporary upload directories, and suppressed email delivery. Production still uses the configured DATABASE_URL. The root requirements.txt remains compatible with existing install commands.
+
+UI changes include a search-first homepage, real community counts, useful empty states, responsive category and product cards, accessible navigation and save controls, reduced-motion support, and improved dark-mode contrast. Search pagination preserves filters; filter submission preserves sorting. Save requests show pending and failure states.

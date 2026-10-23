@@ -1,0 +1,53 @@
+﻿{% extends "base.html" %}
+{% block content %}
+<div class="container home-page">
+  <section class="market-hero" aria-labelledby="hero-title">
+    <div class="hero-copy">
+      <span class="eyebrow"><span class="status-dot"></span> YOUR CAMPUS. YOUR COMMUNITY.</span>
+      <h1 id="hero-title">Good finds.<br>Better <span>campus life.</span></h1>
+      <p>Textbooks for the next semester. A desk for your new space. Find what you need from students nearby.</p>
+      <form class="hero-search" action="{{ url_for('main.search') }}" method="get" role="search">
+        <i class="bi bi-search" aria-hidden="true"></i>
+        <label class="visually-hidden" for="hero-query">What are you looking for?</label>
+        <input id="hero-query" type="search" name="q" placeholder="Try textbooks, headphones, a desk…">
+        <button class="btn btn-primary" type="submit">Find it <i class="bi bi-arrow-right" aria-hidden="true"></i></button>
+      </form>
+      <div class="hero-links"><span>Have something to pass on?</span> <a href="{{ url_for('marketplace.create_listing') if current_user.is_authenticated else url_for('auth.register') }}">Sell an item <i class="bi bi-arrow-up-right" aria-hidden="true"></i></a></div>
+    </div>
+    <aside class="campus-note">
+      <div class="note-top"><i class="bi bi-arrow-repeat" aria-hidden="true"></i><span>A LITTLE LESS NEW.<br>A LOT MORE YOU.</span></div>
+      <h2>Someone’s extra.<br>Your next essential.</h2>
+      <div class="note-categories" aria-hidden="true"><i class="bi bi-book"></i><i class="bi bi-headphones"></i><i class="bi bi-lamp"></i></div>
+      <a href="{{ url_for('main.search') }}">Explore the marketplace <i class="bi bi-arrow-right" aria-hidden="true"></i></a>
+      <span class="note-stamp">PASS IT ON</span>
+    </aside>
+  </section>
+  <div class="community-strip">
+    <span><i class="bi bi-bag" aria-hidden="true"></i><strong>{{ stats.total_listings }}</strong> active listings</span>
+    <span><i class="bi bi-people" aria-hidden="true"></i><strong>{{ stats.total_users }}</strong> community members</span>
+    <span><i class="bi bi-arrow-repeat" aria-hidden="true"></i><strong>{{ stats.total_sold }}</strong> items passed on</span>
+  </div>
+  <section class="home-section" aria-labelledby="category-heading">
+    <div class="section-heading"><div><span class="eyebrow">A PLACE FOR EVERY ESSENTIAL</span><h2 id="category-heading">What’s on your list?</h2></div><a href="{{ url_for('main.search') }}">Browse everything <i class="bi bi-arrow-right" aria-hidden="true"></i></a></div>
+    <div class="category-grid">
+      {% for cat in categories %}
+      <a href="{{ url_for('marketplace.by_category', slug=cat.slug) }}" class="category-tile"><span class="category-icon"><i class="bi {{ cat.icon }}" aria-hidden="true"></i></span><span><strong>{{ cat.name }}</strong><small>{{ cat.product_count }} items</small></span><i class="bi bi-chevron-right category-arrow" aria-hidden="true"></i></a>
+      {% else %}<p class="text-muted">Your campus marketplace is getting started. Check back soon for categories.</p>{% endfor %}
+    </div>
+  </section>
+  {% if featured %}
+  <section class="home-section" aria-labelledby="featured-heading">
+    <div class="section-heading"><div><span class="eyebrow">WORTH A LOOK</span><h2 id="featured-heading">In the spotlight</h2></div><a href="{{ url_for('main.search') }}">View all listings <i class="bi bi-arrow-right" aria-hidden="true"></i></a></div>
+    <div class="row g-4">{% for product in featured %}{% include "marketplace/_product_card.html" %}{% endfor %}</div>
+  </section>
+  {% endif %}
+  <section class="home-section" aria-labelledby="newest-heading">
+    <div class="section-heading"><div><span class="eyebrow">FRESH ON CAMPUS</span><h2 id="newest-heading">Just landed</h2></div><a href="{{ url_for('main.search', sort='newest') }}">See what’s new <i class="bi bi-arrow-right" aria-hidden="true"></i></a></div>
+    <div class="row g-4">
+      {% for product in newest %}{% include "marketplace/_product_card.html" %}
+      {% else %}<div class="col-12"><div class="market-empty"><i class="bi bi-shop" aria-hidden="true"></i><h3>Be the first on the block.</h3><p>Your unused essentials could make someone’s semester. Start with your first listing.</p><a class="btn btn-primary" href="{{ url_for('marketplace.create_listing') if current_user.is_authenticated else url_for('auth.register') }}">List an item <i class="bi bi-plus-lg" aria-hidden="true"></i></a></div></div>{% endfor %}
+    </div>
+  </section>
+  <section class="sell-banner"><div><span class="eyebrow">MAKE ROOM FOR WHAT’S NEXT</span><h2>Less clutter. More possibility.</h2><p>Give your pre-loved things a new home on campus.</p></div><a href="{{ url_for('marketplace.create_listing') if current_user.is_authenticated else url_for('auth.register') }}" class="btn btn-primary">Start selling <i class="bi bi-arrow-up-right" aria-hidden="true"></i></a></section>
+</div>
+{% endblock %}
