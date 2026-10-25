@@ -12,8 +12,54 @@ A modern, full-stack campus peer-to-peer web application built with **Flask 3**,
 
 ---
 
+## 📸 Application Preview
+
+<div align="center">
+
+### 🏠 Search-First Homepage
+*Real-time student marketplace statistics, category carousel, and featured campus listings.*
+<br/>
+<img src="docs/screenshots/01_homepage.png" alt="Campus Marketplace Homepage" width="900" style="border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);" />
+
+<br/><br/>
+
+### 🔍 Catalog Search & Multi-Filter Engine
+*Filter by category, price range, condition, and campus pickup location with persistent sorting and pagination.*
+<br/>
+<img src="docs/screenshots/02_browse_search.png" alt="Catalog Search and Filters" width="900" style="border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);" />
+
+<br/><br/>
+
+### 📦 Product Listing Detail & Inquiry
+*Interactive image gallery, condition badges, seller ratings, and direct 1-on-1 messaging.*
+<br/>
+<img src="docs/screenshots/03_listing_detail.png" alt="Listing Detail View" width="900" style="border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);" />
+
+</div>
+
+<br/>
+
+<details>
+<summary><b>👀 Click to view Authentication & Information Pages</b></summary>
+<br/>
+
+| Student Login | University Domain Registration |
+| :---: | :---: |
+| <img src="docs/screenshots/04_auth_login.png" alt="Student Login" width="450" /> | <img src="docs/screenshots/05_auth_register.png" alt="Student Registration" width="450" /> |
+
+<br/>
+
+| About & Campus Guidelines |
+| :---: |
+| <img src="docs/screenshots/06_about.png" alt="About and Guidelines" width="700" /> |
+
+</details>
+
+---
+
 ## 📑 Table of Contents
 
+- [📸 Application Preview](#-application-preview)
 - [✨ Features](#-features)
 - [🛠️ Tech Stack](#️-tech-stack)
 - [📁 Project Architecture](#-project-architecture)
@@ -59,7 +105,7 @@ A modern, full-stack campus peer-to-peer web application built with **Flask 3**,
 - **Database:** PostgreSQL 14+ (Production / Development), SQLite (In-Memory Test Runner)
 - **Frontend:** Jinja2 server-rendered templates, Vanilla ES6+ JavaScript, Bootstrap 5.3, Bootstrap Icons *(No Node.js or Webpack build step required)*
 - **Real-Time:** WebSockets / Long-polling via Socket.IO (`threading` for development, `gevent` for production)
-- **Cloud Media Storage:** [Cloudinary](https://cloudinary.com/) (persistent cloud hosting & CDN delivery for avatars, product photos, and chat attachments) + [Pillow](https://python-pillow.org/) (server-side image validation, compression, and resizing)
+- **Cloud Media Storage:** [Cloudinary](https://cloudinary.com/) (persistent cloud hosting & CDN delivery for avatars, product photos, and chat attachments) + [Pillow](https://python-pillow.org/) (server-side image validation, compression, and resizing) with automatic local storage fallback
 - **Testing:** pytest, unittest, in-memory SQLite fixtures
 
 ---
@@ -75,6 +121,9 @@ CampusMarketplace/
 ├── requirements.txt            # Production dependencies (points to backend/requirements.txt)
 ├── requirements-dev.txt        # Development dependencies (includes pytest)
 ├── .env.example                # Template for environment configuration
+│
+├── docs/                       # Project documentation assets
+│   └── screenshots/            # UI screenshots previewed in README
 │
 ├── frontend/                   # ── Presentation Layer ──────────────────
 │   ├── templates/              # Jinja2 HTML templates
@@ -180,7 +229,7 @@ SCHOOL_EMAIL_DOMAIN=@up.edu.ph
 # Real-Time (Socket.IO)
 SOCKETIO_ASYNC_MODE=threading
 
-# Media Storage (Cloudinary - required for avatar and product image uploads)
+# Media Storage (Cloudinary - optional; automatically falls back to local storage if unconfigured)
 CLOUDINARY_CLOUD_NAME=your_cloud_name
 CLOUDINARY_API_KEY=your_api_key
 CLOUDINARY_API_SECRET=your_api_secret
@@ -295,11 +344,11 @@ python -m unittest backend.tests.test_ui_regressions -v
 
 ## ☁️ Cloudinary Media Setup
 
-Campus Marketplace uses [Cloudinary](https://cloudinary.com/) for media storage. Uploaded images are:
-1. Checked for allowed extensions (`.png`, `.jpg`, `.jpeg`, `.gif`, `.webp`).
-2. Converted and optimized via Pillow (aspect-ratio preservation and LANCZOS compression).
-3. Uploaded directly to your Cloudinary storage under organized folders (`products/`, `avatars/`, `messages/`).
-4. Stored as persistent, SSL-secured CDN URLs in the database.
+Campus Marketplace supports both cloud storage via [Cloudinary](https://cloudinary.com/) and local disk storage:
+1. Uploaded images are checked for allowed extensions (`.png`, `.jpg`, `.jpeg`, `.gif`, `.webp`).
+2. Images are preprocessed and optimized via Pillow (aspect-ratio preservation and LANCZOS compression).
+3. If Cloudinary credentials are provided, the image is uploaded directly to your Cloudinary storage under organized subfolders (`products/`, `avatars/`, `messages/`).
+4. If Cloudinary is not configured or encounters network issues, the application **automatically falls back to local file storage** under `uploads/`, ensuring seamless operation in any environment.
 
 To configure Cloudinary:
 1. Sign up for a free account at [Cloudinary](https://cloudinary.com/).
