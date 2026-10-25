@@ -29,8 +29,9 @@ def allowed_image(filename: str) -> bool:
 
 def save_image(file_storage, subfolder: str, size: tuple = None) -> str:
     """
-    Upload an image to Cloudinary under <subfolder>/, optionally resize it first.
-    Returns the full Cloudinary URL (not just a filename).
+    Save an uploaded image. If Cloudinary credentials are valid, uploads to Cloudinary.
+    Otherwise, gracefully falls back to local storage under uploads/<subfolder>/.
+    Returns the accessible URL path.
     """
     img = Image.open(file_storage)
 
@@ -41,38 +42,67 @@ def save_image(file_storage, subfolder: str, size: tuple = None) -> str:
     if size:
         img.thumbnail(size, Image.LANCZOS)
 
-    # Save resized image to a temporary in-memory buffer
-    import io
-    buffer = io.BytesIO()
-    img.save(buffer, format="JPEG", optimize=True, quality=85)
-    buffer.seek(0)
+    cloud_name = os.environ.get("CLOUDINARY_CLOUD_NAME")
+    api_key = os.environ.get("CLOUDINARY_API_KEY")
+    api_secret = os.environ.get("CLOUDINARY_API_SECRET")
 
-    public_id = f"{subfolder}/{uuid.uuid4().hex}"
+    # Try Cloudinary if configured and not placeholder
+    if cloud_name and api_key and api_secret and cloud_name.strip() and cloud_name != "your_cloud_name":
+        try:
+            import io
+            buffer = io.BytesIO()
+            img.save(buffer, format="JPEG", optimize=True, quality=85)
+            buffer.seek(0)
 
-    result = cloudinary.uploader.upload(
-        buffer,
-        public_id=public_id,
-        overwrite=True,
-        resource_type="image",
-    )
+            public_id = f"{subfolder}/{uuid.uuid4().hex}"
 
-    return result["secure_url"]
+            result = cloudinary.uploader.upload(
+                buffer,
+                public_id=public_id,
+                overwrite=True,
+                resource_type="image",
+            )
+
+            return result["secure_url"]
+        except Exception as e:
+            if current_app:
+                current_app.logger.warning("Cloudinary upload failed (%s), falling back to local storage.", e)
+
+    # Local filesystem storage fallback
+    upload_root = current_app.config["UPLOAD_FOLDER"] if current_app else os.path.join(os.getcwd(), "uploads")
+    dest_dir = os.path.join(upload_root, subfolder)
+    os.makedirs(dest_dir, exist_ok=True)
+
+    filename = f"{uuid.uuid4().hex}.jpg"
+    filepath = os.path.join(dest_dir, filename)
+    img.save(filepath, format="JPEG", optimize=True, quality=85)
+
+    return f"/uploads/{subfolder}/{filename}"
 
 
 def delete_image(filename: str, subfolder: str) -> None:
-    """Delete an image from Cloudinary if it exists."""
+    """Delete an image from Cloudinary or local disk."""
     if not filename:
         return
 
-    # filename is actually a full Cloudinary URL now; extract the public_id
-    try:
-        # URL looks like: https://res.cloudinary.com/<cloud>/image/upload/v.../<subfolder>/<id>.jpg
-        parts = filename.split("/")
-        # last two segments: subfolder/filename.ext
-        public_id = f"{parts[-2]}/{parts[-1].rsplit('.', 1)[0]}"
-        cloudinary.uploader.destroy(public_id)
-    except Exception:
-        pass
+    # Cloudinary URL
+    if "cloudinary.com" in filename:
+        try:
+            parts = filename.split("/")
+            public_id = f"{parts[-2]}/{parts[-1].rsplit('.', 1)[0]}"
+            cloudinary.uploader.destroy(public_id)
+        except Exception:
+            pass
+    else:
+        # Local file deletion
+        try:
+            clean_name = os.path.basename(filename)
+            upload_root = current_app.config["UPLOAD_FOLDER"] if current_app else os.path.join(os.getcwd(), "uploads")
+            path = os.path.join(upload_root, subfolder, clean_name)
+            if os.path.isfile(path):
+                os.remove(path)
+        except Exception:
+            pass
 
 
 # ── Slug helpers ──────────────────────────────────────────────────────────────

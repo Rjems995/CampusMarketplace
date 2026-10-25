@@ -6,6 +6,7 @@ from flask_login import login_required, current_user
 
 from backend.extensions import db
 from backend.models.user import User
+from backend.models.profile import Profile
 from backend.models.product import Product
 from backend.models.favorite import Favorite
 from backend.models.notification import Notification
@@ -82,6 +83,10 @@ def edit_profile():
         current_user.last_name  = form.last_name.data.strip()
 
         p = current_user.profile
+        if not p:
+            p = Profile(user_id=current_user.id)
+            db.session.add(p)
+
         p.bio        = form.bio.data
         p.course     = form.course.data
         p.year_level = form.year_level.data
@@ -91,7 +96,7 @@ def edit_profile():
         p.social_fb  = form.social_fb.data
 
         # Profile picture
-        if form.profile_picture.data and form.profile_picture.data.filename:
+        if form.profile_picture.data and getattr(form.profile_picture.data, "filename", None):
             if p.profile_picture:
                 delete_image(p.profile_picture, "avatars")
             p.profile_picture = save_image(

@@ -67,7 +67,10 @@ class User(UserMixin, db.Model):
     @property
     def avatar_url(self) -> str:
         if self.profile and self.profile.profile_picture:
-            return self.profile.profile_picture
+            pic = self.profile.profile_picture
+            if pic.startswith("http://") or pic.startswith("https://") or pic.startswith("/"):
+                return pic
+            return f"/uploads/avatars/{pic}"
         return "/static/images/default-avatar.png"
 
     @property

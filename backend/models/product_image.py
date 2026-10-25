@@ -17,4 +17,6 @@ class ProductImage(db.Model):
 
     @property
     def url(self) -> str:
-        return self.filename
+        if self.filename.startswith("http://") or self.filename.startswith("https://") or self.filename.startswith("/"):
+            return self.filename
+        return f"/uploads/products/{self.filename}"

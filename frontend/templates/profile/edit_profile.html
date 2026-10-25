@@ -22,7 +22,12 @@
                   <i class="bi bi-camera me-1"></i>Change Photo
                 </label>
                 {{ form.profile_picture(class="d-none", accept="image/*") }}
-                <div class="text-muted smaller mt-1">JPG or PNG, max 2MB</div>
+                <div class="text-muted smaller mt-1">JPG, PNG, or WebP</div>
+                {% if form.profile_picture.errors %}
+                <div class="text-danger small mt-1">
+                  {{ form.profile_picture.errors[0] }}
+                </div>
+                {% endif %}
               </div>
             </div>
 
@@ -30,49 +35,76 @@
             <div class="row g-3 mb-3">
               <div class="col-md-6">
                 <label class="form-label fw-semibold">First Name</label>
-                {{ form.first_name(class="form-control") }}
+                {{ form.first_name(class="form-control" + (" is-invalid" if form.first_name.errors else "")) }}
+                {% if form.first_name.errors %}
+                <div class="invalid-feedback">{{ form.first_name.errors[0] }}</div>
+                {% endif %}
               </div>
               <div class="col-md-6">
                 <label class="form-label fw-semibold">Last Name</label>
-                {{ form.last_name(class="form-control") }}
+                {{ form.last_name(class="form-control" + (" is-invalid" if form.last_name.errors else "")) }}
+                {% if form.last_name.errors %}
+                <div class="invalid-feedback">{{ form.last_name.errors[0] }}</div>
+                {% endif %}
               </div>
             </div>
 
             <div class="mb-3">
               <label class="form-label fw-semibold">Bio</label>
-              {{ form.bio(class="form-control", rows=3, placeholder="Tell other students about yourself…") }}
+              {{ form.bio(class="form-control" + (" is-invalid" if form.bio.errors else ""), rows=3, placeholder="Tell other students about yourself…") }}
+              {% if form.bio.errors %}
+              <div class="invalid-feedback">{{ form.bio.errors[0] }}</div>
+              {% endif %}
             </div>
 
             <div class="row g-3 mb-3">
               <div class="col-md-6">
                 <label class="form-label fw-semibold">Course / Program</label>
-                {{ form.course(class="form-control", placeholder="e.g. BS Computer Science") }}
+                {{ form.course(class="form-control" + (" is-invalid" if form.course.errors else ""), placeholder="e.g. BS Computer Science") }}
+                {% if form.course.errors %}
+                <div class="invalid-feedback">{{ form.course.errors[0] }}</div>
+                {% endif %}
               </div>
               <div class="col-md-6">
                 <label class="form-label fw-semibold">Year Level</label>
-                {{ form.year_level(class="form-select") }}
+                {{ form.year_level(class="form-select" + (" is-invalid" if form.year_level.errors else "")) }}
+                {% if form.year_level.errors %}
+                <div class="invalid-feedback">{{ form.year_level.errors[0] }}</div>
+                {% endif %}
               </div>
             </div>
 
             <div class="mb-3">
               <label class="form-label fw-semibold">School / University</label>
-              {{ form.school(class="form-control", placeholder="e.g. University of the Philippines Diliman") }}
+              {{ form.school(class="form-control" + (" is-invalid" if form.school.errors else ""), placeholder="e.g. University of the Philippines Diliman") }}
+              {% if form.school.errors %}
+              <div class="invalid-feedback">{{ form.school.errors[0] }}</div>
+              {% endif %}
             </div>
 
             <div class="row g-3 mb-3">
               <div class="col-md-6">
                 <label class="form-label fw-semibold">Phone Number</label>
-                {{ form.phone(class="form-control", placeholder="+63 9XX XXX XXXX") }}
+                {{ form.phone(class="form-control" + (" is-invalid" if form.phone.errors else ""), placeholder="+63 9XX XXX XXXX") }}
+                {% if form.phone.errors %}
+                <div class="invalid-feedback">{{ form.phone.errors[0] }}</div>
+                {% endif %}
               </div>
               <div class="col-md-6">
                 <label class="form-label fw-semibold">Location</label>
-                {{ form.location(class="form-control", placeholder="e.g. Diliman, Quezon City") }}
+                {{ form.location(class="form-control" + (" is-invalid" if form.location.errors else ""), placeholder="e.g. Diliman, Quezon City") }}
+                {% if form.location.errors %}
+                <div class="invalid-feedback">{{ form.location.errors[0] }}</div>
+                {% endif %}
               </div>
             </div>
 
             <div class="mb-4">
               <label class="form-label fw-semibold">Facebook Profile URL</label>
-              {{ form.social_fb(class="form-control", placeholder="https://facebook.com/yourprofile") }}
+              {{ form.social_fb(class="form-control" + (" is-invalid" if form.social_fb.errors else ""), placeholder="https://facebook.com/yourprofile") }}
+              {% if form.social_fb.errors %}
+              <div class="invalid-feedback">{{ form.social_fb.errors[0] }}</div>
+              {% endif %}
             </div>
 
             <div class="d-flex gap-2">

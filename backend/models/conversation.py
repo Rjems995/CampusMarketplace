@@ -51,7 +51,11 @@ class Message(db.Model):
 
     @property
     def image_url(self):
-        return self.image_filename
+        if not self.image_filename:
+            return None
+        if self.image_filename.startswith("http://") or self.image_filename.startswith("https://") or self.image_filename.startswith("/"):
+            return self.image_filename
+        return f"/uploads/messages/{self.image_filename}"
 
     def to_dict(self) -> dict:
         return {
