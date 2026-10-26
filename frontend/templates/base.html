@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/favicon-32.png') }}">
-  <link rel="apple-touch-icon" href="{{ url_for('static', filename='images/favicon-512.png') }}">
+  <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='images/branding/favicon-32.png') }}">
+  <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='images/branding/apple-touch-icon.png') }}">
   <title>{% block title %}{{ title or app_name }}{% endblock %} — {{ app_name }}</title>
   <meta name="description" content="{% block meta_desc %}Campus Marketplace — Buy, sell, and trade safely within your university community.{% endblock %}">
 
@@ -23,9 +23,9 @@
 <a class="skip-link" href="#main-content">Skip to content</a>
 <nav class="navbar navbar-expand-lg navbar-custom sticky-top" id="mainNav">
   <div class="container">
-    <a class="navbar-brand fw-bold" href="{{ url_for('main.index') }}">
-  <img src="{{ url_for('static', filename='images/wordmark.png') }}" alt="{{ app_name }}" height="36">
-    </a>
+    {% with brand_class='navbar-brand' %}
+      {% include 'partials/_brand.html' %}
+    {% endwith %}
 
     <!-- Search bar -->
     <form class="d-none d-lg-flex mx-3 flex-grow-1" action="{{ url_for('main.search') }}" method="get">
@@ -190,7 +190,11 @@
   <div class="container">
     <div class="row g-4">
       <div class="col-lg-4">
-        <h5 class="fw-bold mb-3"><i class="bi bi-shop me-2 text-primary"></i>{{ app_name }}</h5>
+        <div class="mb-3">
+          {% with brand_class='cm-brand-footer' %}
+            {% include 'partials/_brand.html' %}
+          {% endwith %}
+        </div>
         <p class="text-white-50 small">A marketplace exclusively for students. Buy, sell, and trade safely within your university community.</p>
       </div>
       <div class="col-6 col-lg-2">

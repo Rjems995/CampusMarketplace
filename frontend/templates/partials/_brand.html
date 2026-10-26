@@ -1,0 +1,13 @@
+<a class="cm-brand {{ brand_class | default('') }}" href="{{ url_for('main.index') }}"
+   aria-label="{{ app_name }} home">
+  <img class="cm-brand-mark" src="{{ url_for('static', filename='images/branding/campus-mark.png') }}"
+       width="44" height="44" alt="">
+  <span class="cm-brand-name" aria-hidden="true">
+    {% if app_name | lower == 'campus marketplace' %}
+    <span class="cm-brand-campus">campus</span>
+    <span class="cm-brand-marketplace">marketplace</span>
+    {% else %}
+    <span class="cm-brand-custom">{{ app_name }}</span>
+    {% endif %}
+  </span>
+</a>
