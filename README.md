@@ -10,6 +10,40 @@
 
 A modern, full-stack campus peer-to-peer web application built with **Flask 3**, **PostgreSQL**, **Flask-SocketIO**, and **Bootstrap 5**. Designed specifically for university students to buy, sell, and trade items—such as textbooks, school supplies, electronics, dorm furniture, and gear—safely within their verified academic community.
 
+## Run from the terminal
+
+Install **Python 3.12** once, then open PowerShell in the folder containing `run.cmd` and run:
+
+```powershell
+.\run.cmd
+```
+
+Open **http://localhost:5000**. Stop the server with **Ctrl+C**. Use the same command every time.
+
+The first run creates `.venv`, installs dependencies, and creates the SQLite database and categories automatically. Internet access is needed for the first dependency installation. No virtual environment activation, PostgreSQL setup, `.env` editing, or frontend build is needed for this local mode.
+
+Local accounts and listings persist in `instance/local.sqlite3`; photos are saved in `instance/uploads/`. Local mode disables outgoing email and Cloudinary uploads. Register an account in the app to get started. Existing PostgreSQL data is separate and is not copied into this local database.
+
+If you are in the outer `CampusMarketplace` folder, enter the project folder first:
+
+```powershell
+cd .\CampusMarketplace
+.\run.cmd
+```
+
+Optional commands:
+
+```powershell
+.\run.cmd --port 5001    # Choose another port
+.\run.cmd --check        # Set up and check the app without starting the server
+.\run.cmd --install      # Run dependency installation again
+.\run.cmd --configured   # Use the database and services configured in .env
+```
+
+`--configured` requires the configured database to exist and its server to be running. It creates missing tables and categories, and preserves existing records. It does not create an admin account. The manual `flask seed-db` command below creates the documented default admin.
+
+On macOS/Linux, run `python3.12 run.py`. On Windows you can also use `py -3.12 run.py`. If Python 3.12 is missing, install it with `py install 3.12`, then reopen the terminal.
+
 ---
 
 ## 📸 Application Preview
@@ -59,6 +93,7 @@ A modern, full-stack campus peer-to-peer web application built with **Flask 3**,
 
 ## 📑 Table of Contents
 
+- [Run from the terminal](#run-from-the-terminal)
 - [📸 Application Preview](#-application-preview)
 - [✨ Features](#-features)
 - [🛠️ Tech Stack](#️-tech-stack)
@@ -102,7 +137,7 @@ A modern, full-stack campus peer-to-peer web application built with **Flask 3**,
 ## 🛠️ Tech Stack
 
 - **Backend:** Python 3.11+, Flask 3.0.3, Flask-Login, Flask-SocketIO, Flask-WTF, Flask-Mail, Flask-Migrate, Flask-Bcrypt, SQLAlchemy ORM, Bleach
-- **Database:** PostgreSQL 14+ (Production / Development), SQLite (In-Memory Test Runner)
+- **Database:** SQLite (local launcher and tests), PostgreSQL 14+ (configured environments and production)
 - **Frontend:** Jinja2 server-rendered templates, Vanilla ES6+ JavaScript, Bootstrap 5.3, Bootstrap Icons *(No Node.js or Webpack build step required)*
 - **Real-Time:** WebSockets / Long-polling via Socket.IO (`threading` for development, `gevent` for production)
 - **Cloud Media Storage:** [Cloudinary](https://cloudinary.com/) (persistent cloud hosting & CDN delivery for avatars, product photos, and chat attachments) + [Pillow](https://python-pillow.org/) (server-side image validation, compression, and resizing) with automatic local storage fallback
@@ -117,6 +152,8 @@ The codebase follows a decoupled modular structure where frontend presentation a
 ```
 CampusMarketplace/
 ├── app.py                      # Root launcher (Socket.IO + Flask application)
+├── run.cmd                     # One-command Windows setup and startup
+├── run.py                      # Environment setup and local/configured startup
 ├── build.sh                    # Deployment build script (installs packages + seeds DB)
 ├── requirements.txt            # Production dependencies (points to backend/requirements.txt)
 ├── requirements-dev.txt        # Development dependencies (includes pytest)
@@ -163,6 +200,8 @@ CampusMarketplace/
 ---
 
 ## 🚀 Quickstart & Installation
+
+For the easiest local setup, use [Run from the terminal](#run-from-the-terminal) above. The following steps are for manually configuring PostgreSQL and external services.
 
 ### 1. Clone the repository
 
@@ -288,7 +327,7 @@ Open your browser and navigate to **http://localhost:5000** 🎉
 
 ## 👤 Default Admin Account
 
-The seed script creates a default administrative account:
+The manual `flask seed-db` command creates a default administrative account. The local `run.cmd` launcher only seeds categories; register a regular account to try the app.
 
 | Attribute | Credential |
 | :--- | :--- |

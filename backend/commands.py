@@ -24,16 +24,9 @@ def register_commands(app):
 
 # ── seed-db ───────────────────────────────────────────────────────────────────
 
-@click.command("seed-db")
-@with_appcontext
-def seed_db():
-    """Seed the database with default categories and admin user."""
+def seed_categories():
+    """Add missing default categories and return the number added."""
     from backend.models.category import Category
-    from backend.models.user import User
-    from backend.models.profile import Profile
-
-    db.create_all()
-  
     # Categories
     default_categories = [
         ("Books",               "books",               "bi-book",             1),
@@ -53,6 +46,18 @@ def seed_db():
             db.session.add(Category(name=name, slug=slug, icon=icon, sort_order=order))
             added += 1
     db.session.commit()
+    return added
+
+
+@click.command("seed-db")
+@with_appcontext
+def seed_db():
+    """Seed the database with default categories and admin user."""
+    from backend.models.user import User
+    from backend.models.profile import Profile
+
+    db.create_all()
+    added = seed_categories()
     click.echo(f"✅ Added {added} categories (skipped existing).")
 
     # Admin user

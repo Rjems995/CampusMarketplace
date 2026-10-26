@@ -47,7 +47,9 @@ def save_image(file_storage, subfolder: str, size: tuple = None) -> str:
     api_secret = os.environ.get("CLOUDINARY_API_SECRET")
 
     # Try Cloudinary if configured and not placeholder
-    if cloud_name and api_key and api_secret and cloud_name.strip() and cloud_name != "your_cloud_name":
+    if (not current_app.config.get("LOCAL_MEDIA_ONLY", False)
+            and cloud_name and api_key and api_secret
+            and cloud_name.strip() and cloud_name != "your_cloud_name"):
         try:
             import io
             buffer = io.BytesIO()
